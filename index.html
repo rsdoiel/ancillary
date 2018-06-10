@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>R. S. Doiel, Digital Sandbox</title>
+    <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+<header>
+</header>
+<nav>
+
+</nav>
+
+<section>
+<h1>Ancillary</h1>
+
+<p>A proof of concept web service/web browser combo for building Go based
+applications bound to a Web tech UI.</p>
+
+<pre><code>&quot;Ancillary, like Electron but so much less&quot;
+</code></pre>
+
+<p>Ancillary provides a simple way of creating a GUI leveraging a web browser
+and Go&rsquo;s native http library.  Electron has become very polular for making
+cross platform GUI apps because the UI can be implemented using
+standard web technologies.  This is fine on computers like laptops and
+desktops but a little more challanging for single board systems like
+a Raspberry Pi.  Electron isn&rsquo;t the most slim of platforms. It
+can be challenging to compile from scratch on a system where the
+dependencies are not readily available.  Ancillary seeks to be a poorman&rsquo;s
+Electron providing only a simple web service over http on an available port
+on localhost using one time tokens for keeping the http session private. Ancillary is built
+with Go which provides enough in the way of standard libraries to remove
+the dependency problem of moving Electron to a new platform. It should
+work on an platform that Go can run on and will attempt to use whatever
+the default web browser is available on the system. This means it can work
+on a web browser already optimized for that platform.</p>
+
+<h2>An Ancillary App</h2>
+
+<ul>
+<li>import the Ancillary package into your Go application</li>
+<li>populate a map[string]byte[]{} with your assets</li>
+<li>create an Ancillary structure with inky.CreateApp(so.Argv, map[string]byte[]{})</li>
+<li>envoke app.Run() to start up your application</li>
+<li>Ancillary will start a web service on the first available port (e.g. port 0), show the URL and try to start the default web browser pointing at the service.</li>
+</ul>
+
+</section>
+
+<footer>
+</footer>
+</body>
+</html>

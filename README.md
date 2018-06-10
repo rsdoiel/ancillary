@@ -1,7 +1,10 @@
 
 # Ancillary
 
-Like Electron but so much less.
+A proof of concept web service/web browser combo for building Go based 
+applications bound to a Web tech UI.
+
+    "Ancillary, like Electron but so much less"
 
 Ancillary provides a simple way of creating a GUI leveraging a web browser
 and Go's native http library.  Electron has become very polular for making

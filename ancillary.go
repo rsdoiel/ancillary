@@ -22,7 +22,6 @@ import (
 	"net/url"
 	"os"
 	"os/exec"
-	"path"
 	"strings"
 	"time"
 )
@@ -35,7 +34,6 @@ const (
 type Ancillary struct {
 	Port       string            // The port number as string established by the launched service, default value is ":8111"
 	WebBrowser string            // The path to the web browser for running the UI
-	Htdocs     string            // Htdocs document root for assets, defaults to ""
 	args       []string          // usually set to a copy of os.Argv
 	assets     map[string][]byte // The assets (e.g. HTML, CSS, JavaScript) for your service
 	secret     string            // The onetime key generate to establish a private channel of communications between the browser and Ancillary web service
@@ -45,7 +43,7 @@ type Ancillary struct {
 // defaults including web browser targetted, args, and assets
 // (e.g. map to HTML5/CSS/JavaScript assets associated with the UI
 // of the app).
-func CreateApp(webBrowser string, args []string, assets map[string][]byte) *Ancillary {
+func CreateApp(webBrowser string, args []string) *Ancillary {
 	app := new(Ancillary)
 	//FIXME: need to figure out how to determine a free port above 8000
 	// It should be possible to run multiple Ancillary apps with our
@@ -53,7 +51,7 @@ func CreateApp(webBrowser string, args []string, assets map[string][]byte) *Anci
 	app.Port = ":8111"
 	app.WebBrowser = webBrowser
 	app.args = args
-	app.assets = assets
+	app.assets = map[string][]byte{}
 	return app
 }
 
@@ -64,7 +62,24 @@ func (i *Ancillary) ResetAssets() {
 
 // SetAsset will add an asset to Ancillary struct
 func (i *Ancillary) SetAsset(key string, value []byte) {
-	i.assets[key] = value
+	if strings.HasPrefix(key, "/") == false {
+		i.assets["/"+key] = value
+	} else {
+		i.assets[key] = value
+	}
+}
+
+// HandleAssets is the middleware for handing off to asset requests
+func (i *Ancillary) HandleAssets(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("DEBUG r.URL.Path -> %q", r.URL.Path)
+		if src, ok := i.assets[r.URL.Path]; ok == true {
+			//FIXME: Need to figure out MimeType and send appropraite headers
+			fmt.Fprintf(w, "%s", src)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
 }
 
 // RunApp is responsible for creating a web service and launching
@@ -72,40 +87,24 @@ func (i *Ancillary) SetAsset(key string, value []byte) {
 // the first is an initializaiton function, the second an HTTP HandleFunc
 // which gets bound to the web service, the latter may be nil for
 // this apps that don't need more service then loading assets.
-func (i *Ancillary) RunApp(init func(*Ancillary) error, defaultHandler http.Handler) error {
+func (i *Ancillary) RunApp(init func(*Ancillary) error, defaultHandler func(http.Handler) http.Handler) error {
 	// Initialize the app
 	if err := init(i); err != nil {
 		return err
 	}
+
 	// Setup web service
-	if len(i.assets) > 0 {
-		for p, src := range i.assets {
-			http.HandleFunc(p, func(w http.ResponseWriter, r *http.Request) {
-				//FIXME: Manage session here.
-				fmt.Fprintf(w, "%s", src)
-			})
-		}
-	}
-	// Token to maintain a private single user channel between
-	// web service and browser
-	if i.Htdocs != "" {
-		http.Handle("/", http.FileServer(http.Dir(i.Htdocs)))
-	}
-	if defaultHandler != nil {
-		http.Handle("/", defaultHandler)
-	}
+	mux := http.NewServeMux()
+
+	// FIXME: Wrap outer handler to maintain a private single user
+	// channel between web service and browser
+
 	// Find an available port and launch a web service in a go routine
 	u := new(url.URL)
 	u.Scheme = "http"
 	u.Host = "localhost" + i.Port
 
 	// Launch browser and connect to web service
-	//i.args = append(i.args, "--new-instance")
-	//i.args = append(i.args, "--safe-mode")
-	i.args = append(i.args, "--new-window")
-	//q := u.Query()
-	//q.Set("app", i.secret)
-	//u.RawQuery = q.Encode()
 	i.args = append(i.args, u.String())
 
 	if i.WebBrowser == "" {
@@ -131,7 +130,13 @@ func (i *Ancillary) RunApp(init func(*Ancillary) error, defaultHandler http.Hand
 	}()
 
 	log.Printf("Listening on %s", u.String())
-	err := http.ListenAndServe(u.Host, nil)
+	// Add a default handler if one is provided
+	var err error
+	if defaultHandler != nil {
+		err = http.ListenAndServe(u.Host, i.HandleAssets(defaultHandler(mux)))
+	} else {
+		err = http.ListenAndServe(u.Host, i.HandleAssets(mux))
+	}
 	if err != nil {
 		log.Fatalf("Web Service: %s", err)
 	}
