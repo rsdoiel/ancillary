@@ -26,6 +26,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"time"
 
 	// Main Package
 	"github.com/rsdoiel/ancillary"
@@ -107,7 +108,21 @@ func main() {
 		// configuration before envoking the web service and launching web browser
 		log.Printf("Launch web service and web browser for %s", appName)
 		return nil
-	}, nil)
+	}, func(next http.Handler) http.Handler {
+		// This is an application specific handler adding
+		// two behaviors via this middleware
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/time" {
+				fmt.Fprintf(w, "%s", time.Now().String())
+				return
+			}
+			if r.URL.Path == "/helloworld" {
+				fmt.Fprintln(w, "Hi there!")
+				return
+			}
+			next.Handler(w, r)
+		})
+	})
 	if err != nil {
 		log.Fatal(err)
 	}
