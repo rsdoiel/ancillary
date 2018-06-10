@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>R. S. Doiel, Digital Sandbox</title>
+    <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+<header>
+</header>
+<nav>
+
+</nav>
+
+<section>
+<h1>Basic idea</h1>
+
+<ul>
+<li>load assets for a &ldquo;web app&rdquo; UI as a map[string][]byte
+
+<ul>
+<li>this allows the assets to the UI to be easily compiled in with the binary application</li>
+</ul></li>
+<li>create an Ancillary struct using inky.CreateApp(os.Argv, map[string][]byte{}{})
+
+<ul>
+<li>We need a minimal amount of metadata to run our application environment, this should be help in the struct returned by CreateApp</li>
+</ul></li>
+<li>&ldquo;Run&rdquo; the app by invoke Run() on the inky struct
+
+<ul>
+<li>takes a handler that maps your app&rsquo;s requests to your applications &ldquo;server side&rdquo; functionality (e.g open files, perform non-UI calculations, etc)</li>
+<li>starts a web service on an available port (e.g. using port 8111)</li>
+<li>attempts to launch a web browser pointing at the service</li>
+<li>provides the applications&rsquo; runtime</li>
+</ul></li>
+</ul>
+
+<h2>Ancillary ideas</h2>
+
+<ul>
+<li>Ancillary package should only provide the binding of web service to web browser launch and maybe a web hook to end the web service, nothing else</li>
+<li>Executing the app should reveal the localhost URL and any additional info to manually launch a web browser</li>
+<li>We need some way to prevent another user on the system from sniffing the session, probably auto-generate one time passwords and tokens that are resolved on launch of the web browser&rsquo;s initial negotiation with the webpage</li>
+<li>If no other web browser instance is running shutting down the web browser should also shutdown the app&rsquo;s web service</li>
+</ul>
+
+<h1>Benefits</h1>
+
+<ul>
+<li>By relying only on Go&rsquo;s standard library an Ancillary App should be able to be cross compiled to all platforms where Go runs and a web browser is available+ Shipping an Ancillary App is was easy to copying a Go static binary</li>
+<li>Ancillary should be reasonable light weight assuming the platform has an optimized web browser</li>
+<li>An inky app provides the API &ldquo;server side&rdquo; that the app needs, no other resources get exposed (i.e. no default exposure is provided, no file system access, no process access)</li>
+<li>An Ancillary UI is created using standard HTML5, CSS, JavaScript/WebASM that the browser supports so you could limit yourself to HTML5 and create UI that run in Lynx on an embedded system</li>
+<li>GopherJS lets you write programming logic and compile to JavaScript today, Go&rsquo;s compiler is expected to compile to WebASM in an upcoming release, in theory an Ancillary App could be written completely in Go</li>
+<li>Ancillary App is a Go package and thus could be exposed to other languages as a shared library, e.g. Python, Julia</li>
+<li>You can use Go scripting implementations like Lau, JavaScript to provide customization in your app</li>
+</ul>
+
+</section>
+
+<footer>
+</footer>
+</body>
+</html>

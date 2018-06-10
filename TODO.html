@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>R. S. Doiel, Digital Sandbox</title>
+    <link rel="stylesheet" href="/css/site.css">
+</head>
+<body>
+<header>
+</header>
+<nav>
+
+</nav>
+
+<section>
+<h1>TODO</h1>
+
+<h2>Bugs</h2>
+
+<ul>
+<li>If browser is open already, it needs to be detected so os.Exit(0) is called auto-magically because PID changes after new page it handed off to existin browser instance</li>
+</ul>
+
+<h2>Next</h2>
+
+<ul>
+<li>Use a default port range, finding the next avail port for the web service</li>
+<li>Secure the communication channel between envoking Ancillary instance and web browser</li>
+</ul>
+
+<h2>Someday, maybe</h2>
+
+<ul>
+<li>Consider adding a webhook in the web service that will close the web service from the web browser, this would allow us to launch in browser only apps and not tie up a port number (e.g. <a href="http://localhost:8111?exit=0">http://localhost:8111?exit=0</a>, would close the web service leaving the browser running)</li>
+<li>Make map[string][]byte a type of Assets
+
+<ul>
+<li>(a *Assets)CreateAssets()</li>
+<li>(a *Assets)ResetAssets()</li>
+<li>(a *Assets)SetAsset()</li>
+<li>This could allow an appliction to manage assets outside the binary</li>
+<li>This could let you load assets as sets, e.g. multi-language support</li>
+</ul></li>
+</ul>
+
+</section>
+
+<footer>
+</footer>
+</body>
+</html>

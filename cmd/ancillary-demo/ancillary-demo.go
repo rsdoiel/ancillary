@@ -23,6 +23,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/exec"
 	"path"
@@ -76,9 +77,9 @@ func main() {
 	log.Printf("Creating app %s", appName)
 	app := ancillary.CreateApp(browser, flag.Args())
 
-	// 2. Add any accesses
+	// 2. Add any HTML and CSS assets
 	log.Printf("Setting up %s", appName)
-	for p, val := range Demo {
+	for p, val := range HTML {
 		if p == "index.html" {
 			p = "README.html"
 		}
@@ -86,7 +87,10 @@ func main() {
 		app.SetAsset(p, val)
 	}
 	// Add our CSS
-	app.SetAsset("/css/site.css", CSS)
+	for p, val := range CSS {
+		log.Printf("Adding asset %s", p)
+		app.SetAsset(p, val)
+	}
 	// add our initial landing page.
 	app.SetAsset("/", []byte(`
 <!DOCTYPE html>
@@ -95,9 +99,11 @@ func main() {
   	<h1>Hello World!</h1>
 	<p>This is a proof of concept demo of Ancillary</p>
 	<ul>
-		<li><a href="README.html">README</a></li>
-		<li><a href="NOTES.html">NOTES</a></li>
-		<li><a href="license.html">LICENSE</a></li>
+		<li><a href="/time">Time</a> (dynamically calculated by service)</li>
+		<li><a href="/helloworld">Hello World</a> (dynamically calculated by service)</li>
+		<li><a href="README.html">README</a> (HTML page as asset)</li>
+		<li><a href="NOTES.html">NOTES</a> (HTML page as asset)</li>
+		<li><a href="license.html">LICENSE</a> (HTML page as asset)</li>
 	</ul>
   </body>
 </html>
@@ -120,7 +126,7 @@ func main() {
 				fmt.Fprintln(w, "Hi there!")
 				return
 			}
-			next.Handler(w, r)
+			next.ServeHTTP(w, r)
 		})
 	})
 	if err != nil {

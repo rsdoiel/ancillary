@@ -72,9 +72,8 @@ func (i *Ancillary) SetAsset(key string, value []byte) {
 // HandleAssets is the middleware for handing off to asset requests
 func (i *Ancillary) HandleAssets(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("DEBUG r.URL.Path -> %q", r.URL.Path)
 		if src, ok := i.assets[r.URL.Path]; ok == true {
-			//FIXME: Need to figure out MimeType and send appropraite headers
+			//FIXME: Need to detect mime-type and send appropraite headers
 			fmt.Fprintf(w, "%s", src)
 			return
 		}

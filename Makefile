@@ -19,7 +19,6 @@ ifeq ($(OS), Windows)
 	EXT = .exe
 endif
 
-
 ancillary-demo$(EXT): bin/ancillary-demo$(EXT)
 
 cmd/ancillary-demo/css.go: .FORCE
@@ -50,7 +49,7 @@ update_version:
 status:
 	git status
 
-save:
+save: website
 	if [ "$(msg)" != "" ]; then git commit -am "$(msg)"; else git commit -am "Quick Save"; fi
 	git push origin $(BRANCH)
 
