@@ -84,6 +84,8 @@ func main() {
 		log.Printf("Adding asset %s", p)
 		app.SetAsset(p, val)
 	}
+	// Add our CSS
+	app.SetAsset("/css/site.css", CSS)
 	// add our initial landing page.
 	app.SetAsset("/", []byte(`
 <!DOCTYPE html>
